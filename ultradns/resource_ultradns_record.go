@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/terra-farm/udnssdk"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/terra-farm/udnssdk"
 )
 
 func newRRSetResource(d *schema.ResourceData) (rRSetResource, error) {

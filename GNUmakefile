@@ -1,20 +1,32 @@
-TEST?=$$(go list ./... |grep -vE 'vendor|acceptence')
+TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
-WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=ultradns
+WEBSITE_REPO=github.com/davidji99/${PKG_NAME}
+OS := $(shell uname | tr '[:upper:]' '[:lower:]')
+VERSION := $(shell go run ${PKG_NAME}/version.go)
+SHA := $(shell git rev-parse --short HEAD)
+FILE_NAME=terraform-provider-${PKG_NAME}_v${VERSION}
 
 default: build
 
 build: fmtcheck
 	go install
 
+install: fmtcheck
+	make fmt
+	make build
+	cp ${GOPATH}/bin/terraform-provider-${PKG_NAME} ~/.terraform.d/plugins/${OS}_amd64/${FILE_NAME}
+
+release: fmtcheck
+	scripts/build-release
+
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+		xargs -t -n4 go test -v $(TESTARGS) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=1 go test  acceptence_test/acceptence_test.go  -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -ldflags="-X=github.com/davidji99/terraform-provider-${PKG_NAME}/version.ProviderVersion=test"
 
 vet:
 	@echo "go vet ."
@@ -33,9 +45,6 @@ fmtcheck:
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
-
-vendor-status:
-	@govendor status
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
@@ -59,5 +68,4 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck vendor-status test-compile website website-test
-
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test

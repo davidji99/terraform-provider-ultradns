@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/fatih/structs"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/terra-farm/udnssdk"
@@ -586,7 +585,7 @@ func hashIPInfoIPs(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%s-", m["cidr"].(string)))
 	buf.WriteString(fmt.Sprintf("%s", m["address"].(string)))
 
-	h := hashcode.String(buf.String())
+	h := HashcodeString(buf.String())
 	log.Printf("[DEBUG] hashIPInfoIPs(): %v -> %v", buf.String(), h)
 	return h
 }

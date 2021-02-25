@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/terra-farm/udnssdk"
 )
@@ -155,7 +154,7 @@ func mapFromLimit(name string, l udnssdk.ProbeDetailsLimitDTO) map[string]interf
 // hashLimits generates a hashcode for a limits block
 func hashLimits(v interface{}) int {
 	m := v.(map[string]interface{})
-	h := hashcode.String(m["name"].(string))
+	h := HashcodeString(m["name"].(string))
 	log.Printf("[INFO] hashLimits(): %v -> %v", m["name"].(string), h)
 	return h
 }
@@ -192,7 +191,7 @@ func makeSetFromStrings(ss []string) *schema.Set {
 // hashRdata generates a hashcode for an Rdata block
 func hashRdatas(v interface{}) int {
 	m := v.(map[string]interface{})
-	h := hashcode.String(m["host"].(string))
+	h := HashcodeString(m["host"].(string))
 	log.Printf("[DEBUG] hashRdatas(): %v -> %v", m["host"].(string), h)
 	return h
 }
